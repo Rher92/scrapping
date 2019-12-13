@@ -1,0 +1,6 @@
+1) los logs del sistema se podran ver en var/log/syslog
+2) en la funcion get_item_info al final de esta funcion ya se tendra la info asociada a cada publicacion de trabajo, preferiblemente aqui se debe utilizar el orm de django para almacenar la info.
+3) si el scrapper se desea utilizar como un webservices:
+	- modificar job_ads() por job_ads(request)
+4) si el scrapper se desea utilizar como un script fuera del entorno de django:
+	descomentar y completar la info en  la cabecera del script donde se carga el entorno de django y personalizar.
