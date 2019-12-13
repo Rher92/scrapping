@@ -4,3 +4,7 @@
 	- modificar job_ads() por job_ads(request)
 4) si el scrapper se desea utilizar como un script fuera del entorno de django:
 	descomentar y completar la info en  la cabecera del script donde se carga el entorno de django y personalizar.
+5) la info del scrapping es un diccionario de la siguiente manera:
+
+{'ofertaId': '83637', 'Código del anuncio': 'EA\\2019\\014247', 'Nombre del anuncio': 'TELEOPERADOR/A ATENCION AL CLIENTE - DISCAPACIDAD SEVILLA', 'Descripción del anuncio': 'Avisa Servicios Integrales, S.L.U. ofrece puesto vacante como teleoperador atención al cliente con venta cruzada para el sector de automoción. Funciones: Emisión/Recepción de llamadas a clientes; Promoción y comercialización de productos y servicios; Otras funciones relacionadas con el puesto de trabajo. Se solicita perfil comerciales, experiencia tanto en atención al cliente/comercual a puerta fría como en telemarketing, valorable conocer sectores como automoción o seguros. Conocimientos en cierre de ventas. Contrato de 25h/s de L a V. Turnos rotativos de mañana y tarde. Se requiere certificado de discapacidad igual o superior al 33%, carné de conducir y vehículo propio.', 'Anuncio para personas con discapacidad': 'Exclusivamente', 'Número de puestos': '10', 'Categoría': 'COMERCIAL / VENTAS', 'País': 'ESPAÑA', 'Comunidad Autónoma': 'ANDALUCÍA', 'Provincia': 'SEVILLA', 'Localidad': 'SEVILLA'}
+
