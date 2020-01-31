@@ -1,55 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import threading
 from bs4 import BeautifulSoup
-import logging
-import logging.config
+from concurrent.futures import Future
 
-# descomentar y completar la info necesaria.
-#import os
-#import django
-#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings.local")
-#django.setup()
-#from project.apps.bla.models import MyModel
+from decorators import timer
+from logging_config import _logger as logger
 
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'syslog': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.SysLogHandler',
-            'formatter': 'verbose',
-            'facility': 'user',
-            'address': '/dev/log',            
-        },
-    },
-    'loggers': {
-        'scrapper': {
-            'handlers': ['syslog'],
-            'level': 'DEBUG',
-        }
-    }
-}
-
-
-logger = logging.getLogger('scrapper')
-logging.config.dictConfig(LOGGING)
-
-
+@timer
 def job_ads():
     _url = 'https://ws054.juntadeandalucia.es'
     _second = '/eureka2/eureka-demandantes/'
     init_url = _url + _second + 'listadoOfertas.do'
 
-    _vars = get_list_items(init_url)
+    _vars = get_items_list(init_url)
 
     if not _vars:
         logger.error('Request a pagina Inicial no valido.')
@@ -61,20 +26,20 @@ def job_ads():
 
     _continue = True
     while _continue:
-        for offer_query in list_items:    
-            get_item_info(_url + _second + offer_query) 
+        for offer_query in list_items:
+            future = generate_request(_url + _second + offer_query)
+            future.add_done_callback(get_item_info)
         
-        if not _dir:
-            logger.info('Scrapping culminado')
+        if not _dir and future.done:
             break
     
-        _vars = get_list_items(_url + _dir)
+        _vars = get_items_list(_url + _dir)
         _soup = _vars[0]
         list_items = _vars[1]
         _dir = get_next_page(_soup)
 
 
-def get_list_items(url):
+def get_items_list(url):
     response = _request(url)
     if not response:
         return response
@@ -119,11 +84,10 @@ def get_list(_soup, _class):
     return list_items
 
 
-def get_item_info(url):
-    response = _request(url)
-    if not response:
-        return
+def get_item_info(future):
+    response = future.result()
     
+    url = response.url
     _soup = BeautifulSoup(response.content, 'html.parser') 
     tbody = _soup.find_all('tbody')
 
@@ -139,8 +103,16 @@ def get_item_info(url):
             value = td[1].text.strip()
             item[key] = value
     logger.info(item)
-    # enviar item al orm de django.
 
+
+def generate_request(url):
+    future = Future()
+
+    thread = threading.Thread(
+        target=(lambda: future.set_result(_request(url))))
+        
+    thread.start()
+    return future
 
 if __name__ == '__main__':
     job_ads()
